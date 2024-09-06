@@ -3,6 +3,8 @@ import torch.nn as nn
 import pandas as pd
 import requests
 from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
 
 # Define the BiRNN model
 class BiRNNModel(nn.Module):
@@ -60,11 +62,22 @@ def prepare_dataset(symbols, sequence_length=5):
             label = scaled_data[i]
             all_data.append((seq, label))
     return all_data, scaler
+        scaler = MinMaxScaler()
+        X_scaled = scaler.fit_transform(X)
 
 # Define the training process
 def train_model(model, data, epochs=50, lr=0.001, sequence_length=5):
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+model.compile(optimizer='adam', loss='mean_squared_error')
+model.fit(X_scaled, y[:-1], epochs=50, batch_size=32)  # Train on all but the last target
+    
+    model = Sequential()
+model.add(Dense(64, activation='relu', input_shape=(X_scaled.shape[1],)))
+model.add(Dropout(0.2))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(1))  # Output layer
     
     for epoch in range(epochs):
         epoch_loss = 0
@@ -86,11 +99,19 @@ def train_model(model, data, epochs=50, lr=0.001, sequence_length=5):
     print("Model trained and saved as birnn_model_optimized.pth")
 
 if __name__ == "__main__":
+
+    # Assuming df is your DataFrame with stock data
+df['SMA'] = df['Close'].rolling(window=20).mean()  # 20-period simple moving average
+    X = df[['SMA', 'RSI', 'MACD']]  # Features
+y = df['Close'].shift(-1)        # Target: Next-day closing price
+    
     # Define the model
     model = BiRNNModel(input_size=1, hidden_layer_size=115, output_size=1, num_layers=2, dropout=0.3)
 
     # Symbols to train on
     symbols = ['BNBUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'ARBUSDT']
+
+    predictions = model.predict(X_test_scaled)
 
     # Prepare data
     data, scaler = prepare_dataset(symbols)
