@@ -20,8 +20,18 @@ class BiRNNModel(nn.Module):
         return predictions
 
 # Function to fetch historical data from Binance
-def get_binance_data(symbol="ETHUSDT", interval="1m", limit=1000):
+def get_binance_data(symbol="ETHUSDT", interval="3m", limit=1000):
     url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+    
+def get_binance_data(symbol="BTCUSDT", interval="5m", limit=1000):
+    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+
+def get_binance_data(symbol="SOLUSDT", interval="3m", limit=1000):
+    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+
+def get_binance_data(symbol="BNBUSDT", interval="5", limit=1000):
+    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
@@ -39,7 +49,7 @@ def get_binance_data(symbol="ETHUSDT", interval="1m", limit=1000):
         raise Exception(f"Failed to retrieve data: {response.text}")
 
 # Prepare the dataset
-def prepare_dataset(symbols, sequence_length=10):
+def prepare_dataset(symbols, sequence_length=5):
     all_data = []
     for symbol in symbols:
         df = get_binance_data(symbol)
@@ -52,7 +62,7 @@ def prepare_dataset(symbols, sequence_length=10):
     return all_data, scaler
 
 # Define the training process
-def train_model(model, data, epochs=50, lr=0.001, sequence_length=10):
+def train_model(model, data, epochs=50, lr=0.001, sequence_length=5):
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     
