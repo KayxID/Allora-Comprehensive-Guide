@@ -29,7 +29,7 @@ def get_binance_data(symbol="BTCUSDT", interval="5m", limit=1000):
 def get_binance_data(symbol="SOLUSDT", interval="3m", limit=1000):
     url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
 
-def get_binance_data(symbol="BNBUSDT", interval="5", limit=1000):
+def get_binance_data(symbol="BNBUSDT", interval="5m", limit=1000):
     url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
 
     response = requests.get(url)
