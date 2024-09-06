@@ -28,9 +28,29 @@ model.load_state_dict(torch.load("birnn_model_optimized.pth", weights_only=True)
 model.eval()
 
 # Function to fetch historical data from Binance
-def get_binance_url(symbol="ETHUSDT", interval="1m", limit=1000):
+def get_binance_url(symbol="ETHUSDT", interval="3m", limit=900):
+    return f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+    
+def get_binance_url(symbol="BTCUSDT", interval="1m", limit=1000):
     return f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
 
+def get_binance_url(symbol="SOLUSDT", interval="5m", limit=800):
+    return f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+
+def get_historical_data(symbol, interval, start_time, end_time):
+    base_url = "https://api.binance.com/api/v3/klines"
+    
+    params = {
+        'symbol': symbol,
+        'interval': interval,
+        'startTime': start_time,
+        'endTime': end_time,
+        'limit': 1000  # maximum limit for a single request
+    }
+# Specify the start and end time in milliseconds since epoch
+    start_time = int(datetime(2023, 5, 1, tzinfo=timezone.utc).timestamp() * 1000)
+    end_time = int(datetime(2024, 9, 6, tzinfo=timezone.utc).timestamp() * 1000)
+    
 @app.route("/inference/<string:token>")
 def get_inference(token):
     if model is None:
