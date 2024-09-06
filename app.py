@@ -4,8 +4,17 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 import requests
 from flask import Flask, Response, json
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
 
 app = Flask(__name__)
+
+# Assuming df is your DataFrame with stock data
+df['SMA'] = df['Close'].rolling(window=35).mean()  # 35-period simple moving average
+
+X = df[['SMA', 'RSI', 'MACD']]  # Features
+y = df['Close'].shift(-1)        # Target: Next-day closing price
+
 
 # Define the BiRNN model with the correct architecture
 class BiRNNModel(nn.Module):
@@ -104,11 +113,23 @@ def get_inference(token):
         scaler = MinMaxScaler(feature_range=(-1, 1))
         scaled_data = scaler.fit_transform(df['price'].values.reshape(-1, 1))
 
+        scaler = MinMaxScaler()
+        X_scaled = scaler.fit_transform(X)
+
         seq = torch.FloatTensor(scaled_data).view(1, -1, 1)
 
         # Make prediction
         with torch.no_grad():
             y_pred = model(seq)
+
+        model = Sequential()
+model.add(Dense(64, activation='relu', input_shape=(X_scaled.shape[1],)))
+model.add(Dropout(0.2))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(1))  # Output layer
+
+model.compile(optimizer='adam', loss='mean_squared_error')
+model.fit(X_scaled, y[:-1], epochs=50, batch_size=32)  # Train on all but the last target
 
         # Inverse transform the prediction to get the actual price
         predicted_price = scaler.inverse_transform(y_pred.numpy())
