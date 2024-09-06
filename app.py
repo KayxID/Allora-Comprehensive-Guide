@@ -65,11 +65,21 @@ def get_inference(token):
         df["price"] = df["price"].astype(float)
 
         # Adjust the number of rows based on the symbol
-        if symbol in ['BTCUSDT', 'SOLUSDT']:
+        if symbol in ['BTCUSDT', 'SOLUSDT', 'ETHUSDT', 'BNBUSDT', 'ARBUSDT']:
+            df = df.tail(1)   # Use last 1 minutes of data
+        else:
+            df = df.tail(5)   # Use last 5 minutes of data 
+        else:
             df = df.tail(10)  # Use last 10 minutes of data
         else:
             df = df.tail(20)  # Use last 20 minutes of data
-
+        else:
+            df = df.tail(30) # Use last 30 minutes of data 
+        else:
+            df = df.tail(45) # Use last 45 minutes of data 
+        else:
+            df = df.tail(45) # Use last 60 minutes of data 
+            
         # Prepare data for the BiRNN model
         scaler = MinMaxScaler(feature_range=(-1, 1))
         scaled_data = scaler.fit_transform(df['price'].values.reshape(-1, 1))
